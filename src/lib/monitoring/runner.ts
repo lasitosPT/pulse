@@ -1,5 +1,6 @@
 import { IncidentStatus, MonitorStatus } from '@/generated/prisma/enums'
 import { prisma } from '@/lib/db'
+import { dispatchIncidentAlerts } from '@/lib/notifications/dispatch'
 import { performCheck } from './check'
 import { evaluateIncidentTransition } from './incidents'
 
@@ -9,7 +10,7 @@ export const MONITOR_EVENTS_CHANNEL = 'monitor_events'
 /**
  * Run a single check for a monitor, then persist the result, the derived
  * monitor status, and any incident transition — atomically — before notifying
- * real-time subscribers.
+ * real-time subscribers and dispatching alerts.
  */
 export async function runMonitorCheck(monitorId: string): Promise<void> {
   const monitor = await prisma.monitor.findUnique({ where: { id: monitorId } })
@@ -56,6 +57,19 @@ export async function runMonitorCheck(monitorId: string): Promise<void> {
 
   const payload = JSON.stringify({ organizationId: monitor.organizationId, monitorId })
   await prisma.$executeRaw`SELECT pg_notify(${MONITOR_EVENTS_CHANNEL}, ${payload})`
+
+  // Alerting must never break a check run.
+  if (transition.type === 'open' || transition.type === 'resolve') {
+    try {
+      await dispatchIncidentAlerts(monitor.organizationId, {
+        monitor: { name: monitor.name, url: monitor.url },
+        kind: transition.type === 'open' ? 'opened' : 'resolved',
+        cause: transition.type === 'open' ? transition.cause : null,
+      })
+    } catch (error) {
+      console.error('[alerts] dispatch failed', error)
+    }
+  }
 }
 
 /** Run all active monitors whose interval has elapsed. */

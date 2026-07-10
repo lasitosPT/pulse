@@ -47,3 +47,26 @@ export async function getMonitorDetail(monitorId: string, userId: string) {
 
   return { monitor, role: membership.role }
 }
+
+/**
+ * Public status data for an organization by slug. Deliberately selects only
+ * non-sensitive fields (names and statuses — never URLs or config).
+ */
+export async function getPublicStatus(slug: string) {
+  return prisma.organization.findUnique({
+    where: { slug },
+    select: {
+      name: true,
+      monitors: {
+        where: { isActive: true },
+        orderBy: { createdAt: 'asc' },
+        select: {
+          id: true,
+          name: true,
+          status: true,
+          checks: { orderBy: { checkedAt: 'desc' }, take: 30, select: { success: true } },
+        },
+      },
+    },
+  })
+}

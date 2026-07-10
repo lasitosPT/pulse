@@ -72,13 +72,14 @@ enum Role {
 }
 
 model Organization {
-  id          String       @id @default(cuid())
-  name        String
-  slug        String       @unique
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  memberships Membership[]
-  monitors    Monitor[]
+  id            String         @id @default(cuid())
+  name          String
+  slug          String         @unique
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  memberships   Membership[]
+  monitors      Monitor[]
+  alertChannels AlertChannel[]
 }
 
 model Membership {
@@ -160,4 +161,23 @@ model Incident {
   monitor        Monitor        @relation(fields: [monitorId], references: [id], onDelete: Cascade)
 
   @@index([monitorId, status])
+}
+
+// ─── Alerting ──────────────────────────────────────────────────────
+
+enum AlertChannelType {
+  EMAIL
+  WEBHOOK
+}
+
+model AlertChannel {
+  id             String           @id @default(cuid())
+  organizationId String
+  type           AlertChannelType
+  target         String
+  isActive       Boolean          @default(true)
+  createdAt      DateTime         @default(now())
+  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
 }

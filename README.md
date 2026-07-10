@@ -108,7 +108,7 @@ prisma/
 - [x] Auth & multi-tenant teams (Auth.js v5, RBAC)
 - [x] Monitors & scheduled checks
 - [x] Incident engine, charts & real-time dashboard (SSE)
-- [ ] Alerting & public status pages
+- [x] Alerting (email + webhooks) & public status pages
 - [ ] Stripe billing
 - [ ] Production deploy
 

@@ -1,31 +1,19 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { auth } from '@/auth'
-import { Role } from '@/generated/prisma/enums'
-import { MonitorStatus } from '@/generated/prisma/enums'
-import { getMembership } from '@/lib/auth/authz'
-import { hasRole } from '@/lib/auth/rbac'
+import { MonitorStatus, Role } from '@/generated/prisma/enums'
+import { currentUserHasOrgRole } from '@/lib/auth/authz'
 import { prisma } from '@/lib/db'
-import { createMonitorSchema } from '@/lib/monitoring/validations'
 import { runMonitorCheck } from '@/lib/monitoring/runner'
+import { createMonitorSchema } from '@/lib/monitoring/validations'
 import type { MonitorFormState } from './types'
-
-/** Ensure the current user has at least the given role within an organization. */
-async function authorizeOrg(organizationId: string, required: Role) {
-  const session = await auth()
-  const userId = session?.user?.id
-  if (!userId) return false
-  const membership = await getMembership(userId, organizationId)
-  return Boolean(membership && hasRole(membership.role, required))
-}
 
 export async function createMonitorAction(
   organizationId: string,
   _prev: MonitorFormState,
   formData: FormData,
 ): Promise<MonitorFormState> {
-  if (!(await authorizeOrg(organizationId, Role.ADMIN))) {
+  if (!(await currentUserHasOrgRole(organizationId, Role.ADMIN))) {
     return { error: 'You do not have permission to add monitors.' }
   }
 
@@ -53,7 +41,7 @@ async function authorizeMonitor(monitorId: string) {
     select: { id: true, organizationId: true, isActive: true },
   })
   if (!monitor) return null
-  return (await authorizeOrg(monitor.organizationId, Role.ADMIN)) ? monitor : null
+  return (await currentUserHasOrgRole(monitor.organizationId, Role.ADMIN)) ? monitor : null
 }
 
 export async function toggleMonitorAction(monitorId: string) {

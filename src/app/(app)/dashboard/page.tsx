@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { IncidentList } from '@/components/incidents/incident-list'
 import { AddMonitorForm } from '@/components/monitors/add-monitor-form'
 import { MonitorList } from '@/components/monitors/monitor-list'
@@ -34,9 +35,18 @@ export default async function DashboardPage() {
       <div className="flex items-center justify-between gap-2">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">{organization.name}</h1>
-          <p className="text-muted-foreground">
-            {monitors.length} {monitors.length === 1 ? 'monitor' : 'monitors'}
-          </p>
+          <div className="text-muted-foreground flex items-center gap-3 text-sm">
+            <span>
+              {monitors.length} {monitors.length === 1 ? 'monitor' : 'monitors'}
+            </span>
+            <Link
+              href={`/status/${organization.slug}`}
+              target="_blank"
+              className="text-primary hover:underline"
+            >
+              Public status page ↗
+            </Link>
+          </div>
         </div>
         {role && <Badge variant="primary">{role}</Badge>}
       </div>

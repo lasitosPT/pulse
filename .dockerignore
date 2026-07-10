@@ -1,0 +1,16 @@
+node_modules
+.next
+.git
+.github
+npm-debug.log*
+.env*
+!.env.example
+coverage
+playwright-report
+test-results
+e2e
+**/*.test.ts
+**/*.test.tsx
+README.md
+ARCHITECTURE.md
+CONTRIBUTING.md

@@ -9,7 +9,7 @@
 ![Prisma](https://img.shields.io/badge/Prisma-ORM-2D3748?logo=prisma&logoColor=white)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
 
-**Status:** 🚧 Active development
+**Status:** MVP complete — see [ARCHITECTURE.md](ARCHITECTURE.md) for the design.
 
 Pulse continuously checks your HTTP endpoints, detects incidents the moment they happen, and keeps
 your team and your users informed through real-time dashboards, alerts, and shareable status pages.
@@ -79,6 +79,7 @@ Then open [http://localhost:3000](http://localhost:3000).
 | `npm run lint`       | Lint with ESLint                  |
 | `npm run typecheck`  | Type-check with `tsc --noEmit`    |
 | `npm run test`       | Run unit tests (Vitest)           |
+| `npm run test:e2e`   | Run end-to-end tests (Playwright) |
 | `npm run format`     | Format the codebase with Prettier |
 | `npm run db:migrate` | Apply database migrations         |
 | `npm run db:studio`  | Open Prisma Studio                |
@@ -101,6 +102,31 @@ prisma/
 └── schema.prisma   # Database schema & migrations
 ```
 
+> For a deeper dive — data model, key flows, and deployment — see
+> [ARCHITECTURE.md](ARCHITECTURE.md).
+
+## Testing
+
+- **Unit** (Vitest) — pure domain logic: RBAC, slug generation, HTTP checks, the incident state
+  machine, uptime/latency stats, sparkline geometry, plan limits, and webhook payloads.
+  Run with `npm run test`.
+- **End-to-end** (Playwright) — real-browser flows including sign-up → dashboard. Run with
+  `npm run test:e2e` (boots the dev server automatically; requires a database).
+
+## Deployment
+
+Pulse builds to a self-contained server (`output: 'standalone'`) and ships a multi-stage
+[`Dockerfile`](Dockerfile):
+
+```bash
+docker build -t pulse .
+docker run -p 3000:3000 --env-file .env pulse
+```
+
+Because real-time updates use a persistent Postgres `LISTEN` connection, deploy to a **long-running
+Node server** rather than short-lived serverless functions. Point any scheduler at
+`GET /api/cron/run-checks` (with the `CRON_SECRET` bearer token) to drive checks.
+
 ## Roadmap
 
 - [x] Project foundation — Next.js, Prisma, tooling, CI
@@ -110,7 +136,7 @@ prisma/
 - [x] Incident engine, charts & real-time dashboard (SSE)
 - [x] Alerting (email + webhooks) & public status pages
 - [x] Stripe billing (plans, checkout, webhooks, portal)
-- [ ] Production deploy
+- [x] Testing (unit + e2e), docs & Docker deployment
 
 ## License
 

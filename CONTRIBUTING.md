@@ -44,7 +44,7 @@ prisma/
 ### Testing
 
 - Unit tests with Vitest (`npm run test`), colocated as `*.test.ts(x)`.
-- End-to-end tests with Playwright (added as features land).
+- End-to-end tests with Playwright in `e2e/` — run with `npm run test:e2e`.
 - New behavior should ship with tests.
 
 ### Database

@@ -103,7 +103,7 @@ prisma/
 ## Roadmap
 
 - [x] Project foundation — Next.js, Prisma, tooling, CI
-- [ ] Design system & app shell
+- [x] Design system, theming & landing page
 - [ ] Auth & multi-tenant teams
 - [ ] Monitors & scheduled checks
 - [ ] Incident engine & real-time dashboard

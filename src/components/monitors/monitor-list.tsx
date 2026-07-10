@@ -1,4 +1,5 @@
 import { Pause, Play, RefreshCw, Trash2 } from 'lucide-react'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import type { HttpMethod, MonitorStatus } from '@/generated/prisma/enums'
@@ -46,7 +47,12 @@ export function MonitorList({
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
                   <MonitorStatusBadge status={monitor.status} />
-                  <span className="truncate font-medium">{monitor.name}</span>
+                  <Link
+                    href={`/dashboard/monitors/${monitor.id}`}
+                    className="truncate font-medium hover:underline"
+                  >
+                    {monitor.name}
+                  </Link>
                 </div>
                 <p className="text-muted-foreground truncate text-sm">
                   {monitor.method} {monitor.url}

@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { MonitorStatus, Role } from '@/generated/prisma/enums'
 import { currentUserHasOrgRole } from '@/lib/auth/authz'
+import { canAddMonitor, planFor } from '@/lib/billing/plans'
 import { prisma } from '@/lib/db'
 import { runMonitorCheck } from '@/lib/monitoring/runner'
 import { createMonitorSchema } from '@/lib/monitoring/validations'
@@ -15,6 +16,17 @@ export async function createMonitorAction(
 ): Promise<MonitorFormState> {
   if (!(await currentUserHasOrgRole(organizationId, Role.ADMIN))) {
     return { error: 'You do not have permission to add monitors.' }
+  }
+
+  const organization = await prisma.organization.findUnique({
+    where: { id: organizationId },
+    select: { plan: true, _count: { select: { monitors: true } } },
+  })
+  if (organization && !canAddMonitor(organization.plan, organization._count.monitors)) {
+    const config = planFor(organization.plan)
+    return {
+      error: `Your ${config.name} plan allows up to ${config.monitorLimit} monitors. Upgrade to add more.`,
+    }
   }
 
   const parsed = createMonitorSchema.safeParse({

@@ -8,6 +8,7 @@ import { signOutAction } from '@/server/actions/auth'
 const navLinks = [
   { href: '/dashboard', label: 'Monitors' },
   { href: '/dashboard/settings', label: 'Alerts' },
+  { href: '/dashboard/billing', label: 'Billing' },
 ]
 
 type DashboardHeaderProps = {

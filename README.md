@@ -109,7 +109,7 @@ prisma/
 - [x] Monitors & scheduled checks
 - [x] Incident engine, charts & real-time dashboard (SSE)
 - [x] Alerting (email + webhooks) & public status pages
-- [ ] Stripe billing
+- [x] Stripe billing (plans, checkout, webhooks, portal)
 - [ ] Production deploy
 
 ## License

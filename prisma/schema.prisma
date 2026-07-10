@@ -71,15 +71,26 @@ enum Role {
   MEMBER
 }
 
+enum Plan {
+  FREE
+  PRO
+  BUSINESS
+}
+
 model Organization {
-  id            String         @id @default(cuid())
-  name          String
-  slug          String         @unique
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  memberships   Membership[]
-  monitors      Monitor[]
-  alertChannels AlertChannel[]
+  id                   String         @id @default(cuid())
+  name                 String
+  slug                 String         @unique
+  plan                 Plan           @default(FREE)
+  stripeCustomerId     String?        @unique
+  stripeSubscriptionId String?        @unique
+  subscriptionStatus   String?
+  currentPeriodEnd     DateTime?
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+  memberships          Membership[]
+  monitors             Monitor[]
+  alertChannels        AlertChannel[]
 }
 
 model Membership {

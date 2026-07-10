@@ -1,11 +1,12 @@
 import type { Metadata } from 'next'
+import { IncidentList } from '@/components/incidents/incident-list'
 import { AddMonitorForm } from '@/components/monitors/add-monitor-form'
 import { MonitorList } from '@/components/monitors/monitor-list'
 import { Badge } from '@/components/ui/badge'
 import { Role } from '@/generated/prisma/enums'
 import { hasRole } from '@/lib/auth/rbac'
 import { getUserOrganizations, requireUser } from '@/lib/auth/session'
-import { getOrgMonitors } from '@/lib/monitoring/queries'
+import { getOpenIncidents, getOrgMonitors } from '@/lib/monitoring/queries'
 
 export const metadata: Metadata = { title: 'Dashboard' }
 
@@ -20,10 +21,13 @@ export default async function DashboardPage() {
 
   const role = organization.memberships[0]?.role
   const canManage = role ? hasRole(role, Role.ADMIN) : false
-  const monitors = await getOrgMonitors(organization.id)
+  const [monitors, incidents] = await Promise.all([
+    getOrgMonitors(organization.id),
+    getOpenIncidents(organization.id),
+  ])
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div className="flex items-center justify-between gap-2">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">{organization.name}</h1>
@@ -33,6 +37,8 @@ export default async function DashboardPage() {
         </div>
         {role && <Badge variant="primary">{role}</Badge>}
       </div>
+
+      <IncidentList incidents={incidents} canManage={canManage} />
 
       {canManage && <AddMonitorForm organizationId={organization.id} />}
 

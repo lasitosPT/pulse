@@ -125,6 +125,7 @@ model Monitor {
   updatedAt       DateTime      @updatedAt
   organization    Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   checks          Check[]
+  incidents       Incident[]
 
   @@index([organizationId])
 }
@@ -140,4 +141,23 @@ model Check {
   monitor        Monitor  @relation(fields: [monitorId], references: [id], onDelete: Cascade)
 
   @@index([monitorId, checkedAt])
+}
+
+enum IncidentStatus {
+  OPEN
+  ACKNOWLEDGED
+  RESOLVED
+}
+
+model Incident {
+  id             String         @id @default(cuid())
+  monitorId      String
+  status         IncidentStatus @default(OPEN)
+  cause          String?
+  startedAt      DateTime       @default(now())
+  acknowledgedAt DateTime?
+  resolvedAt     DateTime?
+  monitor        Monitor        @relation(fields: [monitorId], references: [id], onDelete: Cascade)
+
+  @@index([monitorId, status])
 }

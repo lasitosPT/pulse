@@ -2,6 +2,7 @@
 
 > Uptime & status monitoring for modern teams — real-time incident detection, alerting that actually reaches you, and branded public status pages.
 
+[![CI](https://github.com/lasitosPT/pulse/actions/workflows/ci.yml/badge.svg)](https://github.com/lasitosPT/pulse/actions/workflows/ci.yml)
 ![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Neon-4169E1?logo=postgresql&logoColor=white)

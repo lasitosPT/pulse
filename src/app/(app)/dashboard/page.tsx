@@ -1,37 +1,42 @@
 import type { Metadata } from 'next'
+import { AddMonitorForm } from '@/components/monitors/add-monitor-form'
+import { MonitorList } from '@/components/monitors/monitor-list'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Role } from '@/generated/prisma/enums'
+import { hasRole } from '@/lib/auth/rbac'
 import { getUserOrganizations, requireUser } from '@/lib/auth/session'
+import { getOrgMonitors } from '@/lib/monitoring/queries'
 
 export const metadata: Metadata = { title: 'Dashboard' }
 
 export default async function DashboardPage() {
   const user = await requireUser()
   const organizations = await getUserOrganizations(user.id)
+  const organization = organizations[0]
+
+  if (!organization) {
+    return <p className="text-muted-foreground">No organization found for your account.</p>
+  }
+
+  const role = organization.memberships[0]?.role
+  const canManage = role ? hasRole(role, Role.ADMIN) : false
+  const monitors = await getOrgMonitors(organization.id)
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">
-          Welcome back{user.name ? `, ${user.name}` : ''}
-        </h1>
-        <p className="text-muted-foreground">Here are your organizations.</p>
+      <div className="flex items-center justify-between gap-2">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">{organization.name}</h1>
+          <p className="text-muted-foreground">
+            {monitors.length} {monitors.length === 1 ? 'monitor' : 'monitors'}
+          </p>
+        </div>
+        {role && <Badge variant="primary">{role}</Badge>}
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {organizations.map((organization) => (
-          <Card key={organization.id}>
-            <CardHeader>
-              <div className="flex items-center justify-between gap-2">
-                <CardTitle>{organization.name}</CardTitle>
-                <Badge variant="primary">{organization.memberships[0]?.role}</Badge>
-              </div>
-              <CardDescription>/{organization.slug}</CardDescription>
-            </CardHeader>
-            <CardContent className="text-muted-foreground text-sm">No monitors yet.</CardContent>
-          </Card>
-        ))}
-      </div>
+      {canManage && <AddMonitorForm organizationId={organization.id} />}
+
+      <MonitorList monitors={monitors} canManage={canManage} />
     </div>
   )
 }

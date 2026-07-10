@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { IncidentList } from '@/components/incidents/incident-list'
 import { AddMonitorForm } from '@/components/monitors/add-monitor-form'
 import { MonitorList } from '@/components/monitors/monitor-list'
+import { LiveRefresh } from '@/components/realtime/live-refresh'
 import { Badge } from '@/components/ui/badge'
 import { Role } from '@/generated/prisma/enums'
 import { hasRole } from '@/lib/auth/rbac'
@@ -28,6 +29,8 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
+      <LiveRefresh orgId={organization.id} />
+
       <div className="flex items-center justify-between gap-2">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">{organization.name}</h1>

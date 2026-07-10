@@ -3,9 +3,13 @@ import { prisma } from '@/lib/db'
 import { performCheck } from './check'
 import { evaluateIncidentTransition } from './incidents'
 
+/** Postgres channel used to broadcast monitor changes to SSE subscribers. */
+export const MONITOR_EVENTS_CHANNEL = 'monitor_events'
+
 /**
  * Run a single check for a monitor, then persist the result, the derived
- * monitor status, and any incident transition — atomically.
+ * monitor status, and any incident transition — atomically — before notifying
+ * real-time subscribers.
  */
 export async function runMonitorCheck(monitorId: string): Promise<void> {
   const monitor = await prisma.monitor.findUnique({ where: { id: monitorId } })
@@ -49,6 +53,9 @@ export async function runMonitorCheck(monitorId: string): Promise<void> {
           ]
         : []),
   ])
+
+  const payload = JSON.stringify({ organizationId: monitor.organizationId, monitorId })
+  await prisma.$executeRaw`SELECT pg_notify(${MONITOR_EVENTS_CHANNEL}, ${payload})`
 }
 
 /** Run all active monitors whose interval has elapsed. */

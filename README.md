@@ -104,7 +104,7 @@ prisma/
 
 - [x] Project foundation — Next.js, Prisma, tooling, CI
 - [x] Design system, theming & landing page
-- [ ] Auth & multi-tenant teams
+- [x] Auth & multi-tenant teams (Auth.js v5, RBAC)
 - [ ] Monitors & scheduled checks
 - [ ] Incident engine & real-time dashboard
 - [ ] Alerting & public status pages
